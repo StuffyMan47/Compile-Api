@@ -7,6 +7,7 @@
         public string compilationErrors { get; set; }
         public string syntaxErrors { get; set; }
         public bool itDone { get; set; }
+        public string time { get; set; }
 
     }
 }

@@ -3,6 +3,7 @@ using Compile_Api.Models;
 using Microsoft.CodeAnalysis;
 using Newtonsoft.Json;
 using Compile_Api.Analyzer;
+using System.Diagnostics;
 
 namespace Compile_Api.Controllers
 {
@@ -13,6 +14,7 @@ namespace Compile_Api.Controllers
         [HttpPost]
         public Response GetCode(User user)
         {
+            Stopwatch stopwatch = new Stopwatch();
             Response response = new Response();
 
             string[] trustedAssembliesPaths = ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")).Split(Path.PathSeparator);
@@ -27,8 +29,13 @@ namespace Compile_Api.Controllers
             string json = JsonConvert.SerializeObject(user.userCode);
 
             Console.WriteLine(json);
+            stopwatch.Start();
             var compiler = new Compiler("First.Program", user.userCode, new[] { typeof(Console) });
             var type = compiler.Compile();
+            stopwatch.Stop();
+            TimeSpan ts = stopwatch.Elapsed;
+            response.time = String.Format("{0:00}.{1:00}.{2:00}",
+            ts.Seconds, ts.Milliseconds / 10, ts.Nanoseconds / 10);
             if (!string.IsNullOrEmpty(compiler.error))
                 //Запись ошибок компиляции
                 response.compilationErrors = compiler.error;
